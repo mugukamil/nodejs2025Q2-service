@@ -14,6 +14,7 @@ export class UserService {
   private users: User[] = [];
 
   getAll(): Omit<User, 'password'>[] {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return this.users.map(({ password, ...rest }) => rest);
   }
 
@@ -21,7 +22,8 @@ export class UserService {
     this.validateUUID(id);
     const user = this.users.find((u) => u.id === id);
     if (!user) throw new NotFoundException('User not found');
-    const { password, ...rest } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...rest } = user;
     return rest;
   }
 
@@ -39,6 +41,7 @@ export class UserService {
       updatedAt: now,
     };
     this.users.push(user);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user;
     return rest;
   }
@@ -52,6 +55,7 @@ export class UserService {
     user.password = dto.newPassword;
     user.version++;
     user.updatedAt = Date.now();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user;
     return rest;
   }
