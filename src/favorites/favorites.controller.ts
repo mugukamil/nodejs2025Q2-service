@@ -5,7 +5,6 @@ import {
     Delete,
     Param,
     HttpCode,
-    HttpStatus,
     UsePipes,
     ValidationPipe,
 } from "@nestjs/common";
@@ -22,38 +21,38 @@ export class FavoritesController {
     }
 
     @Post("track/:id")
-    @HttpCode(HttpStatus.CREATED)
+    @HttpCode(201)
     addTrack(@Param("id") id: string) {
-        return this.favoritesService.addTrack(id);
+        this.favoritesService.addTrack(id);
     }
 
     @Delete("track/:id")
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(201)
     removeTrack(@Param("id") id: string) {
-        return this.favoritesService.removeTrack(id);
+        this.favoritesService.removeTrack(id);
     }
 
     @Post("album/:id")
-    @HttpCode(HttpStatus.CREATED)
+    @HttpCode(201)
     addAlbum(@Param("id") id: string) {
-        return this.favoritesService.addAlbum(id);
+        this.favoritesService.addAlbum(id);
     }
 
     @Delete("album/:id")
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(201)
     removeAlbum(@Param("id") id: string) {
-        return this.favoritesService.removeAlbum(id);
+        this.favoritesService.removeAlbum(id);
     }
 
     @Post("artist/:id")
-    @HttpCode(HttpStatus.CREATED)
+    @HttpCode(201)
     addArtist(@Param("id") id: string) {
-        return this.favoritesService.addArtist(id);
+        this.favoritesService.addArtist(id);
     }
 
     @Delete("artist/:id")
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(201)
     removeArtist(@Param("id") id: string) {
-        return this.favoritesService.removeArtist(id);
+        this.favoritesService.removeArtist(id);
     }
 }

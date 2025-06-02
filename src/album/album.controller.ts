@@ -7,7 +7,6 @@ import {
     Param,
     Body,
     HttpCode,
-    HttpStatus,
     UsePipes,
     ValidationPipe,
 } from "@nestjs/common";
@@ -31,19 +30,20 @@ export class AlbumController {
     }
 
     @Post()
-    @HttpCode(HttpStatus.CREATED)
+    @HttpCode(201)
     create(@Body() createAlbumDto: CreateAlbumDto) {
         return this.albumService.create(createAlbumDto);
     }
 
     @Put(":id")
+    @HttpCode(201)
     update(@Param("id") id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
         return this.albumService.update(id, updateAlbumDto);
     }
 
     @Delete(":id")
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(201)
     delete(@Param("id") id: string) {
-        return this.albumService.delete(id);
+        this.albumService.delete(id);
     }
 }

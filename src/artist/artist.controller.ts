@@ -7,7 +7,6 @@ import {
     Param,
     Body,
     HttpCode,
-    HttpStatus,
     UsePipes,
     ValidationPipe,
 } from "@nestjs/common";
@@ -31,19 +30,20 @@ export class ArtistController {
     }
 
     @Post()
-    @HttpCode(HttpStatus.CREATED)
+    @HttpCode(201)
     create(@Body() createArtistDto: CreateArtistDto) {
         return this.artistService.create(createArtistDto);
     }
 
     @Put(":id")
+    @HttpCode(201)
     update(@Param("id") id: string, @Body() updateArtistDto: UpdateArtistDto) {
         return this.artistService.update(id, updateArtistDto);
     }
 
     @Delete(":id")
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(201)
     delete(@Param("id") id: string) {
-        return this.artistService.delete(id);
+        this.artistService.delete(id);
     }
 }

@@ -7,7 +7,6 @@ import {
     Param,
     Body,
     HttpCode,
-    HttpStatus,
     UsePipes,
     ValidationPipe,
 } from "@nestjs/common";
@@ -31,19 +30,20 @@ export class TrackController {
     }
 
     @Post()
-    @HttpCode(HttpStatus.CREATED)
+    @HttpCode(201)
     create(@Body() createTrackDto: CreateTrackDto) {
         return this.trackService.create(createTrackDto);
     }
 
     @Put(":id")
+    @HttpCode(201)
     update(@Param("id") id: string, @Body() updateTrackDto: UpdateTrackDto) {
         return this.trackService.update(id, updateTrackDto);
     }
 
     @Delete(":id")
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(201)
     delete(@Param("id") id: string) {
-        return this.trackService.delete(id);
+        this.trackService.delete(id);
     }
 }
