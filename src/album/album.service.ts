@@ -5,69 +5,78 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Album } from './album.entity';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { randomUUID } from 'crypto';
 import { TrackService } from '../track/track.service';
 import { FavoritesService } from '../favorites/favorites.service';
 
 @Injectable()
 export class AlbumService {
-  private albums: Album[] = [];
-
   constructor(
+    @InjectRepository(Album)
+    private albumRepository: Repository<Album>,
     @Inject(forwardRef(() => TrackService)) private trackService: TrackService,
     @Inject(forwardRef(() => FavoritesService))
     private favoritesService: FavoritesService,
   ) {}
 
-  getAll(): Album[] {
-    return this.albums;
+  async getAll(): Promise<Album[]> {
+    return this.albumRepository.find();
   }
 
-  getById(id: string): Album {
+  async getById(id: string): Promise<Album> {
     this.validateUUID(id);
-    const album = this.albums.find((a) => a.id === id);
+    const album = await this.albumRepository.findOne({ where: { id } });
     if (!album) throw new NotFoundException('Album not found');
     return album;
   }
 
-  create(dto: CreateAlbumDto): Album {
-    if (!dto.name || typeof dto.year !== 'number') {
+  async create(dto: CreateAlbumDto): Promise<Album> {
+    if (!dto.name || !dto.year) {
       throw new BadRequestException('Missing required fields');
     }
-    const album: Album = {
-      id: randomUUID(),
+    const album = this.albumRepository.create({
       name: dto.name,
       year: dto.year,
-      artistId: dto.artistId ?? null,
-    };
-    this.albums.push(album);
-    return album;
+      artistId: dto.artistId || null,
+    });
+    return this.albumRepository.save(album);
   }
 
-  update(id: string, dto: UpdateAlbumDto): Album {
+  async update(id: string, dto: UpdateAlbumDto): Promise<Album> {
     this.validateUUID(id);
-    const album = this.albums.find((a) => a.id === id);
+    const album = await this.albumRepository.findOne({ where: { id } });
     if (!album) throw new NotFoundException('Album not found');
     if (dto.name !== undefined) album.name = dto.name;
     if (dto.year !== undefined) album.year = dto.year;
     if (dto.artistId !== undefined) album.artistId = dto.artistId;
-    return album;
+    return this.albumRepository.save(album);
   }
 
-  delete(id: string): void {
+  async delete(id: string): Promise<void> {
     this.validateUUID(id);
-    const idx = this.albums.findIndex((a) => a.id === id);
-    if (idx === -1) throw new NotFoundException('Album not found');
-    // Remove albumId from tracks
-    this.trackService.getAll().forEach((track) => {
-      if (track.albumId === id) track.albumId = null;
-    });
+    const album = await this.albumRepository.findOne({ where: { id } });
+    if (!album) throw new NotFoundException('Album not found');
+
+    // Nullify album references in tracks
+    await this.albumRepository.query(
+      'UPDATE tracks SET "albumId" = NULL WHERE "albumId" = $1',
+      [id],
+    );
+
     // Remove from favorites
-    this.favoritesService.removeAlbum(id);
-    this.albums.splice(idx, 1);
+    await this.favoritesService.removeAlbum(id, true);
+
+    // Delete the album
+    await this.albumRepository.delete(id);
+  }
+
+  // Helper method for updating entities (used by artist service)
+  async updateEntity(album: Album): Promise<Album> {
+    return this.albumRepository.save(album);
   }
 
   private validateUUID(id: string) {

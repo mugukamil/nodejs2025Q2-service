@@ -25,7 +25,6 @@ export class AlbumController {
   }
 
   @Get(':id')
-  @HttpCode(201)
   getById(@Param('id') id: string) {
     return this.albumService.getById(id);
   }
@@ -37,14 +36,13 @@ export class AlbumController {
   }
 
   @Put(':id')
-  @HttpCode(201)
   update(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
     return this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
-  @HttpCode(201)
+  @HttpCode(204)
   delete(@Param('id') id: string) {
-    this.albumService.delete(id);
+    return this.albumService.delete(id);
   }
 }
