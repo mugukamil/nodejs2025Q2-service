@@ -70,7 +70,7 @@ export class ArtistService {
       if (track.artistId === id) track.artistId = null;
     });
     // Remove from favorites
-    this.favoritesService.removeArtist(id);
+    this.favoritesService.removeArtist(id, true);
     this.artists.splice(idx, 1);
   }
 

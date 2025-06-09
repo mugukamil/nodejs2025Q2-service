@@ -66,7 +66,7 @@ export class AlbumService {
       if (track.albumId === id) track.albumId = null;
     });
     // Remove from favorites
-    this.favoritesService.removeAlbum(id);
+    this.favoritesService.removeAlbum(id, true);
     this.albums.splice(idx, 1);
   }
 

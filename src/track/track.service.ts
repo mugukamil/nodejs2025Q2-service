@@ -61,7 +61,7 @@ export class TrackService {
     this.validateUUID(id);
     const idx = this.tracks.findIndex((t) => t.id === id);
     if (idx === -1) throw new NotFoundException('Track not found');
-    this.favoritesService.removeTrack(id);
+    this.favoritesService.removeTrack(id, true);
     this.tracks.splice(idx, 1);
   }
 
