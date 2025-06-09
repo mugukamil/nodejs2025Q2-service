@@ -58,11 +58,24 @@ export class ArtistService {
 
   async delete(id: string): Promise<void> {
     this.validateUUID(id);
-    const result = await this.artistRepository.delete(id);
-    if (result.affected === 0) throw new NotFoundException('Artist not found');
+    const artist = await this.artistRepository.findOne({ where: { id } });
+    if (!artist) throw new NotFoundException('Artist not found');
 
-    // Note: In a real application, you would handle cascading deletes
-    // For now, we'll keep it simple and let the database handle constraints
+    // Nullify artist references in albums and tracks
+    await this.artistRepository.query(
+      'UPDATE albums SET "artistId" = NULL WHERE "artistId" = $1',
+      [id],
+    );
+    await this.artistRepository.query(
+      'UPDATE tracks SET "artistId" = NULL WHERE "artistId" = $1',
+      [id],
+    );
+
+    // Remove from favorites
+    await this.favoritesService.removeArtist(id, true);
+
+    // Delete the artist
+    await this.artistRepository.delete(id);
   }
 
   private validateUUID(id: string) {
