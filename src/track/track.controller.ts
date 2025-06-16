@@ -25,7 +25,6 @@ export class TrackController {
   }
 
   @Get(':id')
-  @HttpCode(201)
   getById(@Param('id') id: string) {
     return this.trackService.getById(id);
   }
@@ -37,14 +36,13 @@ export class TrackController {
   }
 
   @Put(':id')
-  @HttpCode(201)
   update(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
     return this.trackService.update(id, updateTrackDto);
   }
 
   @Delete(':id')
-  @HttpCode(201)
+  @HttpCode(204)
   delete(@Param('id') id: string) {
-    this.trackService.delete(id);
+    return this.trackService.delete(id);
   }
 }

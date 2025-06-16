@@ -4,67 +4,102 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { randomUUID } from 'crypto';
+
+export interface UserResponse {
+  id: string;
+  login: string;
+  version: number;
+  createdAt: number;
+  updatedAt: number;
+}
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
-  getAll(): Omit<User, 'password'>[] {
+  async getAll(): Promise<UserResponse[]> {
+    const users = await this.userRepository.find();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return this.users.map(({ password, ...rest }) => rest);
+    return users.map(({ password, createdAt, updatedAt, ...rest }) => ({
+      ...rest,
+      createdAt: createdAt.getTime(),
+      updatedAt: updatedAt.getTime(),
+    }));
   }
 
-  getById(id: string): Omit<User, 'password'> {
+  async getById(id: string): Promise<UserResponse> {
     this.validateUUID(id);
-    const user = this.users.find((u) => u.id === id);
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _password, ...rest } = user;
-    return rest;
+    const { password, createdAt, updatedAt, ...rest } = user;
+    return {
+      ...rest,
+      createdAt: createdAt.getTime(),
+      updatedAt: updatedAt.getTime(),
+    };
   }
 
-  create(dto: CreateUserDto): Omit<User, 'password'> {
+  async create(dto: CreateUserDto): Promise<UserResponse> {
     if (!dto.login || !dto.password) {
       throw new BadRequestException('Missing required fields');
     }
-    const now = Date.now();
-    const user: User = {
-      id: randomUUID(),
+
+    // Check if user already exists
+    const existingUser = await this.userRepository.findOne({
+      where: { login: dto.login },
+    });
+    if (existingUser) {
+      throw new BadRequestException('User with this login already exists');
+    }
+
+    const user = this.userRepository.create({
       login: dto.login,
       password: dto.password,
-      version: 1,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.users.push(user);
+    });
+    const savedUser = await this.userRepository.save(user);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...rest } = user;
-    return rest;
+    const { password, createdAt, updatedAt, ...rest } = savedUser;
+    return {
+      ...rest,
+      createdAt: createdAt.getTime(),
+      updatedAt: updatedAt.getTime(),
+    };
   }
 
-  updatePassword(id: string, dto: UpdatePasswordDto): Omit<User, 'password'> {
+  async updatePassword(
+    id: string,
+    dto: UpdatePasswordDto,
+  ): Promise<UserResponse> {
     this.validateUUID(id);
-    const user = this.users.find((u) => u.id === id);
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     if (user.password !== dto.oldPassword)
       throw new ForbiddenException('Old password is wrong');
+
     user.password = dto.newPassword;
-    user.version++;
-    user.updatedAt = Date.now();
+    const updatedUser = await this.userRepository.save(user);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...rest } = user;
-    return rest;
+    const { password, createdAt, updatedAt, ...rest } = updatedUser;
+    return {
+      ...rest,
+      createdAt: createdAt.getTime(),
+      updatedAt: updatedAt.getTime(),
+    };
   }
 
-  delete(id: string): void {
+  async delete(id: string): Promise<void> {
     this.validateUUID(id);
-    const idx = this.users.findIndex((u) => u.id === id);
-    if (idx === -1) throw new NotFoundException('User not found');
-    this.users.splice(idx, 1);
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) throw new NotFoundException('User not found');
   }
 
   private validateUUID(id: string) {
