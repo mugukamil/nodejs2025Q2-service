@@ -94,7 +94,7 @@ export class AuthService {
         try {
             // Verify refresh token
             const payload = this.jwtService.verify(refreshToken, {
-                secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
+                secret: this.configService.get<string>("JWT_SECRET_REFRESH_KEY"),
             }) as JwtPayload;
 
             // Validate user still exists
@@ -125,10 +125,10 @@ export class AuthService {
     }
 
     private generateRefreshToken(payload: JwtPayload): string {
-        return this.jwtService.sign(payload, {
-            secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
-            expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRES_IN"),
-        });
+            return this.jwtService.sign(payload, {
+                secret: this.configService.get<string>("JWT_SECRET_REFRESH_KEY"),
+                expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRES_IN"),
+            });
     }
 
     async validateUser(payload: JwtPayload): Promise<User> {

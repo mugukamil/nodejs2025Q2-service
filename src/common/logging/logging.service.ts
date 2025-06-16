@@ -3,12 +3,13 @@ import { ConfigService } from "@nestjs/config";
 import * as fs from "fs";
 import * as path from "path";
 
-export enum CustomLogLevel {
-    ERROR = 0,
-    WARN = 1,
-    LOG = 2,
-    DEBUG = 3,
-    VERBOSE = 4,
+// Using NestJS LogLevel values
+export enum NestLogLevel {
+  ERROR = 0,
+  WARN = 1,
+  LOG = 2,
+  DEBUG = 3,
+  VERBOSE = 4,
 }
 
 @Injectable()
@@ -31,7 +32,7 @@ export class LoggingService {
         }
     }
 
-    private shouldLog(level: CustomLogLevel): boolean {
+    private shouldLog(level: NestLogLevel): boolean {
         return level <= this.logLevel;
     }
 
@@ -72,7 +73,7 @@ export class LoggingService {
     }
 
     error(message: string, trace?: string, context?: string) {
-        if (this.shouldLog(CustomLogLevel.ERROR)) {
+        if (this.shouldLog(NestLogLevel.ERROR)) {
             const errorMessage = trace ? `${message}\nTrace: ${trace}` : message;
             const formattedMessage = this.formatMessage("ERROR", errorMessage, context);
 

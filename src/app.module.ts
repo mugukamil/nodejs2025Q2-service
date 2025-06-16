@@ -10,6 +10,7 @@ import { AlbumModule } from "./album/album.module";
 import { TrackModule } from "./track/track.module";
 import { FavoritesModule } from "./favorites/favorites.module";
 import { AuthModule } from "./auth/auth.module";
+import { AuthGuardModule } from "./auth/auth-guard.module";
 import { User } from "./user/user.entity";
 import { Artist } from "./artist/artist.entity";
 import { Album } from "./album/album.entity";
@@ -17,7 +18,6 @@ import { Track } from "./track/track.entity";
 import { Favorites } from "./favorites/favorites.entity";
 import { LoggingService } from "./common/logging/logging.service";
 import { LoggingMiddleware } from "./common/middleware/logging.middleware";
-import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 
 @Module({
     imports: [
@@ -47,16 +47,10 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard";
         TrackModule,
         FavoritesModule,
         AuthModule,
+        AuthGuardModule,
     ],
     controllers: [AppController],
-    providers: [
-        AppService,
-        LoggingService,
-        {
-            provide: APP_GUARD,
-            useClass: JwtAuthGuard,
-        },
-    ],
+    providers: [AppService, LoggingService],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {

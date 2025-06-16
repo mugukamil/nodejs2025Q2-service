@@ -21,7 +21,7 @@ PORT=4000
 
 # JWT Configuration - CHANGE THESE IN PRODUCTION!
 JWT_ACCESS_SECRET=your-super-secret-access-key-here-change-in-production
-JWT_REFRESH_SECRET=your-super-secret-refresh-key-here-change-in-production
+JWT_SECRET_REFRESH_KEY=your-super-secret-refresh-key-here-change-in-production
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 
